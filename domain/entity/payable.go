@@ -76,7 +76,7 @@ func newPayableWithCreditCard(ID string, transaction *Transaction) *Payable {
 	}
 }
 
-func GetPayable(ID string, transaction *Transaction) (*Payable, error) {
+func PayableFactory(ID string, transaction *Transaction) (*Payable, error) {
 	if transaction.paymentMethod.Method() == "debit_card" {
 		return newPayableWithDebitCard(ID, transaction), nil
 	}
