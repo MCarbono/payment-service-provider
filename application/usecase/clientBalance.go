@@ -22,7 +22,6 @@ func (uc *ClientBalance) Execute(ctx context.Context, input *ClientBalanceInput)
 	if err != nil {
 		return nil, fmt.Errorf("error trying to retrieve balance from user %s: %w", input.ClientID, err)
 	}
-
 	return &ClientBalanceOutput{
 		Balance: ClientBalanceStatus{
 			Paid:      float32(balance[0].TotalAmount / 100),
@@ -40,6 +39,6 @@ type ClientBalanceOutput struct {
 }
 
 type ClientBalanceStatus struct {
-	Paid      float32 `json:"paid"`
+	Paid      float32 `json:"available"`
 	WaitFunds float32 `json:"wait_funds"`
 }
