@@ -8,14 +8,14 @@ import (
 	chiMiddleware "github.com/go-chi/chi/v5/middleware"
 )
 
-func NewRouter(controller *controllers.TransactionController) http.Handler {
+func New(controller *controllers.Transaction) http.Handler {
 	r := chi.NewRouter()
 	r.Use(chiMiddleware.Logger)
 	r.Use(chiMiddleware.StripSlashes)
 	r.Use(JSONContetTyeResponse)
 	r.Post("/transactions", controller.ProcessTransaction)
 	r.Get("/transactions/{id}", controller.ListTransactions)
-	r.Get("/balance/{id}", controller.ProcessTransaction)
+	r.Get("/balance/{id}", controller.Balance)
 	return r
 }
 
