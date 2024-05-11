@@ -3,7 +3,7 @@ package usecase
 import (
 	"context"
 	"fmt"
-	"payment-service-provider/application/repository"
+	"payment-service-provider/application/uow"
 	"payment-service-provider/domain/entity"
 	"time"
 
@@ -11,17 +11,15 @@ import (
 )
 
 type ProcessTransaction struct {
-	transactionRepository repository.TransationRepository
-	payableRepository     repository.PayableRepository
+	uow uow.UnitOfWork
 }
 
 func NewProcessTransaction(
-	transactionRepository repository.TransationRepository,
-	payableRepository repository.PayableRepository,
+
+	uow uow.UnitOfWork,
 ) *ProcessTransaction {
 	return &ProcessTransaction{
-		transactionRepository: transactionRepository,
-		payableRepository:     payableRepository,
+		uow: uow,
 	}
 }
 
@@ -42,13 +40,17 @@ func (uc *ProcessTransaction) Execute(ctx context.Context, input *ProcessTransac
 	if err != nil {
 		return nil, err
 	}
-	//TODO - UOW
-	if err := uc.transactionRepository.Save(ctx, transaction); err != nil {
-		return nil, err
-	}
-	if err := uc.payableRepository.Save(ctx, payable); err != nil {
-		return nil, err
-	}
+	err = uc.uow.RunTx(ctx, func(ctx context.Context, repositories uow.Repositories) error {
+		err := repositories.Transaction().Save(ctx, transaction)
+		if err != nil {
+			return err
+		}
+		err = repositories.Payable().Save(ctx, payable)
+		if err != nil {
+			return err
+		}
+		return nil
+	})
 	return NewProcessTransactionDTO(transaction, payable), nil
 }
 
