@@ -7,6 +7,7 @@ import (
 	"os"
 	"payment-service-provider/config"
 	"payment-service-provider/infra/db"
+	"payment-service-provider/infra/uow"
 	"payment-service-provider/tests/postgrescontainer"
 	"strings"
 	"testing"
@@ -19,6 +20,7 @@ import (
 
 var (
 	DbConn *sql.DB
+	Uow    *uow.UowImpl
 )
 
 func TestMain(m *testing.M) {
@@ -39,6 +41,7 @@ func TestMain(m *testing.M) {
 		panic(err)
 	}
 	DbConn = conn
+	Uow = uow.NewUow(DbConn)
 	dir, err := os.Getwd()
 	if err != nil {
 		panic(err)
