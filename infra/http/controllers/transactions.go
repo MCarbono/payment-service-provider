@@ -34,6 +34,7 @@ func (c *Transaction) ProcessTransaction(w http.ResponseWriter, r *http.Request)
 		json.NewEncoder(w).Encode(err.Error())
 		return
 	}
+	defer r.Body.Close()
 	_, err = c.processTransaction.Execute(r.Context(), &input)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
