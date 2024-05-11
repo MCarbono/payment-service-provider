@@ -17,6 +17,13 @@ type PayableRepository struct {
 	queries *db.Queries
 }
 
+func NewPayableRepositoryWithTx(TX *sql.Tx) *PayableRepository {
+	queries := db.New(TX).WithTx(TX)
+	return &PayableRepository{
+		queries: queries,
+	}
+}
+
 func NewPayableRepository(DB *sql.DB) *PayableRepository {
 	queries := db.New(DB)
 	return &PayableRepository{

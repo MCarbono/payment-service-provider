@@ -17,6 +17,13 @@ type TransactionRepository struct {
 	queries *db.Queries
 }
 
+func NewTransactionRepositoryWithTX(TX *sql.Tx) *TransactionRepository {
+	queries := db.New(TX).WithTx(TX)
+	return &TransactionRepository{
+		queries: queries,
+	}
+}
+
 func NewTransactionRepository(DB *sql.DB) *TransactionRepository {
 	queries := db.New(DB)
 	return &TransactionRepository{
