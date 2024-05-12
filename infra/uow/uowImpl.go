@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 	"payment-service-provider/application/uow"
-	"payment-service-provider/infra/repository"
 )
 
 type UowImpl struct {
@@ -21,7 +20,7 @@ func (u *UowImpl) RunTx(ctx context.Context, fn uow.UnitOfWorkFn) error {
 	if err != nil {
 		return fmt.Errorf("error trying to open tx: %w", err)
 	}
-	err = fn(ctx, repository.NewRepositories(tx))
+	err = fn(ctx, NewRepositories(tx))
 	if err != nil {
 		errRb := tx.Rollback()
 		if errRb != nil {

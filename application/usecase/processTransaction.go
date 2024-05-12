@@ -51,7 +51,7 @@ func (uc *ProcessTransaction) Execute(ctx context.Context, input *ProcessTransac
 		}
 		return nil
 	})
-	return NewProcessTransactionDTO(transaction, payable), nil
+	return NewProcessTransactionDTO(transaction, payable), err
 }
 
 type ProcessTransactionInput struct {
