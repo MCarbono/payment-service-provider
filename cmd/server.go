@@ -1,15 +1,19 @@
 package cmd
 
 import (
-	"database/sql"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
+	"payment-service-provider/application/usecase"
 	"payment-service-provider/config"
 	"payment-service-provider/infra/db"
+	"payment-service-provider/infra/http/controllers"
+	"payment-service-provider/infra/http/router"
+	"payment-service-provider/infra/uow"
 
-	"github.com/golang-migrate/migrate/v4"
-	migratePg "github.com/golang-migrate/migrate/v4/database/postgres"
+	sqlc "payment-service-provider/infra/db/sqlc"
+
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/lib/pq"
 )
@@ -19,39 +23,27 @@ func StartServer() {
 	if err != nil {
 		panic(err)
 	}
-	db, err := db.Open(cfg.DatabaseConfig)
+	conn, err := db.Open(cfg.DatabaseConfig)
 	if err != nil {
 		panic(err)
 	}
-	defer db.Close()
+	defer conn.Close()
 	dir, err := os.Getwd()
 	if err != nil {
 		panic(err)
 	}
 	dir = fmt.Sprintf("file:///%s/infra/db/migration", dir)
-	err = MigrateUp(db, cfg.DatabaseConfig.Name, dir)
+	err = db.MigrateUp(conn, cfg.DatabaseConfig.Name, dir)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("Starting server on port 3000")
-	panic(http.ListenAndServe(":3000", nil))
-}
-
-func MigrateUp(conn *sql.DB, dbName string, migrationsPath string) error {
-	driver, err := migratePg.WithInstance(conn, &migratePg.Config{
-		DatabaseName: dbName,
-	})
-	if err != nil {
-		return fmt.Errorf("failed to get DB instance: %w", err)
-	}
-	migrateClient, err := migrate.NewWithDatabaseInstance(migrationsPath, "postgres", driver)
-	if err != nil {
-		return fmt.Errorf("failed to create migrate client: %w", err)
-	}
-	err = migrateClient.Up()
-	if err != nil {
-		return fmt.Errorf("failed to perform migration: %w", err)
-	}
-	fmt.Println("Migration completed")
-	return nil
+	uow := uow.NewUow(conn)
+	querier := sqlc.New(conn)
+	processTransaction := usecase.NewProcessTransaction(uow)
+	listTransaction := usecase.NewListTransactions(querier)
+	balance := usecase.NewClientBalance(querier)
+	controller := controllers.NewTransaction(processTransaction, listTransaction, balance)
+	r := router.New(controller)
+	fmt.Printf("Starting server on port %s\n", cfg.ServerPort)
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", cfg.ServerPort), r))
 }
