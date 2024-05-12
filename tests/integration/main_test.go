@@ -48,7 +48,7 @@ func TestMain(m *testing.M) {
 	}
 	dir = strings.Replace(dir, "/tests/integration", "", 1)
 	dir = fmt.Sprintf("file:///%s/infra/db/migration", dir)
-	err = migrateUp(conn, cfg.Name, dir)
+	err = MigrateUp(conn, cfg.Name, dir)
 	if err != nil {
 		panic(err)
 	}
@@ -60,7 +60,7 @@ func TestMain(m *testing.M) {
 	os.Exit(exitCode)
 }
 
-func migrateUp(conn *sql.DB, dbName string, migrationsPath string) error {
+func MigrateUp(conn *sql.DB, dbName string, migrationsPath string) error {
 	driver, err := migratePg.WithInstance(conn, &migratePg.Config{
 		DatabaseName: dbName,
 	})

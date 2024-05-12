@@ -11,9 +11,7 @@ const maxRetries = 5
 const retryInterval = 2000 * time.Millisecond
 
 func Open(cfg config.DatabaseConfig) (DB *sql.DB, err error) {
-	DB, err = sql.Open("postgres", fmt.Sprintf(
-		"host=%v port=%v user=%v password=%v dbname=%v sslmode=disable",
-		cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.Name))
+	DB, err = sql.Open("postgres", fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", cfg.User, cfg.Password, cfg.Host, cfg.Port, cfg.Name))
 	if err != nil {
 		return
 	}
@@ -26,6 +24,10 @@ func Open(cfg config.DatabaseConfig) (DB *sql.DB, err error) {
 			fmt.Printf("Connection failed (Attempt %d): %v\n", i+1, err)
 			time.Sleep(retryInterval)
 		}
+	}
+	if err != nil {
+		fmt.Println("failed to connect to the database!")
+		return
 	}
 	fmt.Println("Connected to the database!")
 	return
