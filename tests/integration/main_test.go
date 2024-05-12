@@ -12,8 +12,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/golang-migrate/migrate/v4"
-	migratePg "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/lib/pq"
 )
@@ -48,7 +46,7 @@ func TestMain(m *testing.M) {
 	}
 	dir = strings.Replace(dir, "/tests/integration", "", 1)
 	dir = fmt.Sprintf("file:///%s/infra/db/migration", dir)
-	err = MigrateUp(conn, cfg.Name, dir)
+	err = db.MigrateUp(conn, cfg.Name, dir)
 	if err != nil {
 		panic(err)
 	}
@@ -58,25 +56,6 @@ func TestMain(m *testing.M) {
 		panic(err)
 	}
 	os.Exit(exitCode)
-}
-
-func MigrateUp(conn *sql.DB, dbName string, migrationsPath string) error {
-	driver, err := migratePg.WithInstance(conn, &migratePg.Config{
-		DatabaseName: dbName,
-	})
-	if err != nil {
-		return fmt.Errorf("failed to get DB instance: %w", err)
-	}
-	migrateClient, err := migrate.NewWithDatabaseInstance(migrationsPath, "postgres", driver)
-	if err != nil {
-		return fmt.Errorf("failed to create migrate client: %w", err)
-	}
-	err = migrateClient.Up()
-	if err != nil {
-		return fmt.Errorf("failed to perform migration: %w", err)
-	}
-	fmt.Println("Migration completed")
-	return nil
 }
 
 func cleanDatabaseTables(conn *sql.DB) {
