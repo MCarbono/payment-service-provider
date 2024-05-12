@@ -95,7 +95,7 @@ func TestProcessTransaction(t *testing.T) {
 	t.Run("Should not be able to process a transaction because something went wrong trying to save the payable", func(t *testing.T) {
 		defer cleanDatabaseTables(DbConn)
 		fake.NewFakeRepositoriesSavePayableError()
-		defer fake.DestroyFakeRepositoriesSavePayableError()
+		defer fake.DestroyFakeRepositoriesImpl()
 		uc := usecase.NewProcessTransaction(Uow)
 		input := &usecase.ProcessTransactionInput{
 			ClientID:      uuid.New().String(),
@@ -121,7 +121,7 @@ func TestProcessTransaction(t *testing.T) {
 	t.Run("Should not be able to process a transaction because something went wrong trying to save the transaction", func(t *testing.T) {
 		defer cleanDatabaseTables(DbConn)
 		fake.NewFakeRepositoriesSaveTransactionError()
-		defer fake.DestroyFakeRepositoriesTransactionError()
+		defer fake.DestroyFakeRepositoriesImpl()
 		uc := usecase.NewProcessTransaction(Uow)
 		input := &usecase.ProcessTransactionInput{
 			ClientID:      uuid.New().String(),

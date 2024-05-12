@@ -14,7 +14,7 @@ type repositories struct {
 
 func NewRepositories(tx *sql.Tx) uow.Repositories {
 	if f := fake.GetFakeRepositories(tx); f != nil {
-		return f
+		return f.(uow.Repositories)
 	}
 	return &repositories{tx}
 }

@@ -5,33 +5,26 @@ import (
 	"database/sql"
 	"errors"
 	"payment-service-provider/application/repository"
-	"payment-service-provider/application/uow"
 	"payment-service-provider/domain/entity"
 	infraRepo "payment-service-provider/infra/repository"
 )
 
-func GetFakeRepositories(tx *sql.Tx) uow.Repositories {
-	if fakeRepositoriesSavePayableErrorSingleton != nil {
-		fakeRepositoriesSavePayableErrorSingleton.setTx(tx)
-		return fakeRepositoriesSavePayableErrorSingleton
-	}
-	if fakeRepositoriesTransactionSaveErrorSingleton != nil {
-		fakeRepositoriesTransactionSaveErrorSingleton.setTx(tx)
-		return fakeRepositoriesTransactionSaveErrorSingleton
+type fakeRepositories interface {
+	setTx(tx *sql.Tx)
+}
+
+var fakeRepositoriesImpl fakeRepositories
+
+func GetFakeRepositories(tx *sql.Tx) fakeRepositories {
+	if fakeRepositoriesImpl != nil {
+		fakeRepositoriesImpl.setTx(tx)
+		return fakeRepositoriesImpl
 	}
 	return nil
 }
 
-var fakeRepositoriesSavePayableErrorSingleton *fakeRepositoriesSavePayableError
-
 func NewFakeRepositoriesSavePayableError() {
-	if fakeRepositoriesSavePayableErrorSingleton == nil {
-		fakeRepositoriesSavePayableErrorSingleton = &fakeRepositoriesSavePayableError{}
-	}
-}
-
-func DestroyFakeRepositoriesSavePayableError() {
-	fakeRepositoriesSavePayableErrorSingleton = nil
+	fakeRepositoriesImpl = &fakeRepositoriesSavePayableError{}
 }
 
 type fakeRepositoriesSavePayableError struct {
@@ -61,16 +54,12 @@ func (f *fakePayableRepositorySaveError) GetByID(ctx context.Context, ID string)
 	return nil, nil
 }
 
-var fakeRepositoriesTransactionSaveErrorSingleton *fakeRepositoriesSaveTransactionError
-
 func NewFakeRepositoriesSaveTransactionError() {
-	if fakeRepositoriesTransactionSaveErrorSingleton == nil {
-		fakeRepositoriesTransactionSaveErrorSingleton = &fakeRepositoriesSaveTransactionError{}
-	}
+	fakeRepositoriesImpl = &fakeRepositoriesSaveTransactionError{}
 }
 
-func DestroyFakeRepositoriesTransactionError() {
-	fakeRepositoriesTransactionSaveErrorSingleton = nil
+func DestroyFakeRepositoriesImpl() {
+	fakeRepositoriesImpl = nil
 }
 
 type fakeRepositoriesSaveTransactionError struct {
