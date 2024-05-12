@@ -1,0 +1,12 @@
+{
+    "client_id": "720c158e-4870-4760-be11-9ab6be695b76",
+    "value": 100.0,
+    "description": "transaction test",
+    "payment_method": "credit_card",
+    "card": {
+        "number": "1111-1111-1111-1111",
+        "verification_code": "123",
+        "owner_name": "Teste da Silva",
+        "valid_date": "2030-11-10T15:04:05Z"
+    }
+}
