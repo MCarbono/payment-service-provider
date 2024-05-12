@@ -30,6 +30,6 @@ func LoadEnvConfig() (config, error) {
 	cfg.DatabaseConfig.User = os.Getenv("DB_USER")
 	cfg.DatabaseConfig.Password = os.Getenv("DB_PASSWORD")
 	cfg.DatabaseConfig.Name = os.Getenv("DB_NAME")
-	cfg.ServerPort = os.Getenv("PORT")
+	cfg.ServerPort = os.Getenv("SERVER_PORT")
 	return cfg, nil
 }
