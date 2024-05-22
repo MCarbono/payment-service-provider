@@ -1,7 +1,14 @@
-DOCKER_COMPOSE_DIR := ./deploy
+# DOCKER_COMPOSE_DIR := ./deploy
+
+# db_down:
+# 	cd $(DOCKER_COMPOSE_DIR) && docker compose down 
+
+# db_up:
+# 	cd $(DOCKER_COMPOSE_DIR) && docker compose up -d 
 
 test-integration:
 	go test ./tests/integration -v
+
 test-unit:
 	go test ./domain/entity  -v
 
@@ -18,10 +25,16 @@ sqlc-generate:
 	sqlc generate
 
 db_down:
-	cd $(DOCKER_COMPOSE_DIR) && docker compose down 
+	docker compose down 
 
 db_up:
-	cd $(DOCKER_COMPOSE_DIR) && docker compose up -d 
+	docker compose up -d 
 
 run-local:
 	go run main.go
+
+build:
+	docker-compose -f docker-compose.yml build
+
+run_prod:
+	docker-compose -f docker-compose.yml up -d
