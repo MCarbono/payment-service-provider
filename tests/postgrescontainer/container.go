@@ -20,11 +20,6 @@ func StartPostgresContainer(ctx context.Context) (*PostgresContainer, error) {
 		postgres.WithDatabase(dbName),
 		postgres.WithUsername(dbUser),
 		postgres.WithPassword(dbPassword),
-		// testcontainers.WithWaitStrategy(
-		// 	wait.ForLog("database system is ready to accept connections").
-		// 		WithOccurrence(3).
-		// 		WithStartupTimeout(5*time.Second),
-		// ),
 	)
 	if err != nil {
 		return nil, err
