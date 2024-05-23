@@ -45,7 +45,7 @@ func (c *Transaction) ProcessTransaction(w http.ResponseWriter, r *http.Request)
 }
 
 func (c *Transaction) ListTransactions(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
+	id := chi.URLParam(r, "client_id")
 	output, err := c.listTransactions.Execute(r.Context(), &usecase.ListTransationsInput{ClientID: id})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -57,7 +57,7 @@ func (c *Transaction) ListTransactions(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *Transaction) Balance(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
+	id := chi.URLParam(r, "client_id")
 	output, err := c.clientBalance.Execute(r.Context(), &usecase.ClientBalanceInput{ClientID: id})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

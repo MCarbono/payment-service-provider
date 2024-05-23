@@ -1,6 +1,7 @@
 package router
 
 import (
+	"fmt"
 	"net/http"
 	"payment-service-provider/infra/http/controllers"
 
@@ -13,9 +14,13 @@ func New(controller *controllers.Transaction) http.Handler {
 	r.Use(chiMiddleware.Logger)
 	r.Use(chiMiddleware.StripSlashes)
 	r.Use(JSONContetTyeResponse)
+	r.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintf(w, "pong")
+	})
 	r.Post("/transactions", controller.ProcessTransaction)
-	r.Get("/transactions/{id}", controller.ListTransactions)
-	r.Get("/balance/{id}", controller.Balance)
+	r.Get("/transactions/{client_id}", controller.ListTransactions)
+	r.Get("/balance/{client_id}", controller.Balance)
 	return r
 }
 
