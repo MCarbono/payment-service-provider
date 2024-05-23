@@ -22,6 +22,10 @@ func MigrateUp(conn *sql.DB, dbName string, migrationsPath string) error {
 	}
 	err = migrateClient.Up()
 	if err != nil {
+		if err == migrate.ErrNoChange {
+			fmt.Println("no need to migrate. Database at last version already")
+			return nil
+		}
 		return fmt.Errorf("failed to perform migration: %w", err)
 	}
 	fmt.Println("Migration completed")
