@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -18,8 +19,13 @@ import (
 	_ "github.com/lib/pq"
 )
 
+var (
+	env = flag.String("env", "local", "used to know what environment the project is running")
+)
+
 func StartServer() {
-	cfg, err := config.LoadEnvConfig()
+	flag.Parse()
+	cfg, err := config.LoadEnvConfig(*env)
 	if err != nil {
 		panic(err)
 	}

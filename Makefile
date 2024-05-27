@@ -30,11 +30,14 @@ db_down:
 db_up:
 	docker compose up -d 
 
-run-local:
-	go run main.go
-
 build:
 	docker-compose -f docker-compose.yml build
 
+run:
+	go run main.go 
+
 run_prod:
-	docker-compose -f docker-compose.yml up -d
+	docker-compose -f docker-compose.production.yml up -d
+
+down:
+	docker-compose -f docker-compose.production.yml down 

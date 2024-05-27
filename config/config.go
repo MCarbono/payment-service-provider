@@ -19,13 +19,16 @@ type DatabaseConfig struct {
 	Name     string
 }
 
-func LoadEnvConfig() (config, error) {
+func LoadEnvConfig(env string) (config, error) {
 	var cfg config
 	err := godotenv.Load()
 	if err != nil {
 		return cfg, err
 	}
-	cfg.DatabaseConfig.Host = os.Getenv("DB_HOST")
+	cfg.DatabaseConfig.Host = "localhost"
+	if env != "local" {
+		cfg.DatabaseConfig.Host = os.Getenv("DB_HOST")
+	}
 	cfg.DatabaseConfig.Port = os.Getenv("DB_PORT")
 	cfg.DatabaseConfig.User = os.Getenv("DB_USER")
 	cfg.DatabaseConfig.Password = os.Getenv("DB_PASSWORD")
