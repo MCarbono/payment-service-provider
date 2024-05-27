@@ -15,5 +15,4 @@ COPY .env .
 COPY infra/db/migration ./infra/db/migration
 
 EXPOSE 3000
-CMD ["/app/main"]
 ENTRYPOINT ["/app/main", "--env=production"]
