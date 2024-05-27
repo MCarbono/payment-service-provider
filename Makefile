@@ -31,10 +31,10 @@ db_up:
 	docker compose up -d 
 
 build:
-	docker-compose -f docker-compose.yml build
+	docker-compose -f docker-compose.production.yml build
 
 run:
-	go run main.go 
+	go run main.go --env=local
 
 run_prod:
 	docker-compose -f docker-compose.production.yml up -d
