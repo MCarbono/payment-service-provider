@@ -19,7 +19,7 @@ func TestCreatePayable(t *testing.T) {
 	clientId := uuid.New().String()
 	transaction, err := entity.NewTransaction(id, clientId, "compra teste", 100.0, time.Now(), card, paymentMethod)
 	assert.Equal(t, err, nil)
-	payable, err := entity.PayableFactory(uuid.New().String(), transaction)
+	payable, err := entity.NewPayable(uuid.New().String(), transaction)
 	assert.Equal(t, err, nil)
 	repo := repository.NewPayableRepository(DbConn)
 	err = repo.Save(context.Background(), payable)

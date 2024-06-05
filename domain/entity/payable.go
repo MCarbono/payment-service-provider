@@ -1,7 +1,6 @@
 package entity
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -48,45 +47,30 @@ func (p *Payable) GetPaymentDate() time.Time {
 	return p.paymentDate
 }
 
-func newPayableWithDebitCard(ID string, transaction *Transaction) *Payable {
-	fee := calculateFee(transaction.value, transaction.paymentMethod.Fee())
-	return &Payable{
+func NewPayable(ID string, transaction *Transaction) (*Payable, error) {
+	p := &Payable{
 		id:            ID,
 		clientID:      transaction.clientID,
 		transactionID: transaction.GetID(),
-		status:        paid,
-		feeAmount:     fee,
-		amount:        transaction.GetValue() - fee,
 		createdAt:     transaction.GetCreatedAt(),
-		paymentDate:   transaction.GetCreatedAt(),
 	}
-}
-
-func newPayableWithCreditCard(ID string, transaction *Transaction) *Payable {
-	fee := calculateFee(transaction.value, transaction.paymentMethod.Fee())
-	return &Payable{
-		id:            ID,
-		clientID:      transaction.clientID,
-		transactionID: transaction.GetID(),
-		status:        waitFunds,
-		feeAmount:     fee,
-		amount:        transaction.GetValue() - fee,
-		createdAt:     transaction.GetCreatedAt(),
-		paymentDate:   transaction.GetCreatedAt().AddDate(0, 0, 30),
+	feeCalculator, err := FeeCalculatorFactory(transaction.paymentMethod.Method())
+	if err != nil {
+		return nil, err
 	}
-}
-
-func PayableFactory(ID string, transaction *Transaction) (*Payable, error) {
-	if transaction.paymentMethod.Method() == "debit_card" {
-		return newPayableWithDebitCard(ID, transaction), nil
-	}
+	fee := feeCalculator.calculate(transaction.GetValue())
+	p.feeAmount = fee
+	p.amount = transaction.GetValue() - fee
+	p.paymentDate = transaction.GetCreatedAt()
+	p.status = paid
 	if transaction.paymentMethod.Method() == "credit_card" {
-		return newPayableWithCreditCard(ID, transaction), nil
+		p.status = waitFunds
+		p.paymentDate = transaction.GetCreatedAt().AddDate(0, 0, 30)
 	}
-	return nil, fmt.Errorf("invalid paymentMethod: %s", transaction.paymentMethod.Method())
+	return p, nil
 }
 
-func NewPayable(id, clientID, transactionID string, status payableStatus, fee, value float32, createdAt, paymentDate time.Time) *Payable {
+func RestorePayable(id, clientID, transactionID string, status payableStatus, fee, value float32, createdAt, paymentDate time.Time) *Payable {
 	return &Payable{
 		id:            id,
 		clientID:      clientID,

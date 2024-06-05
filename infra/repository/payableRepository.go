@@ -57,7 +57,7 @@ func (r *PayableRepository) GetByID(ctx context.Context, ID string) (*entity.Pay
 		return nil, fmt.Errorf("error trying to retrieve payable from DB: %w", err)
 	}
 	status := entity.GetPayableStatus(model.Status.String)
-	payable := entity.NewPayable(
+	payable := entity.RestorePayable(
 		model.ID,
 		model.ClientID.String,
 		model.TransactionID.String,

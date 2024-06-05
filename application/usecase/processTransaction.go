@@ -36,7 +36,7 @@ func (uc *ProcessTransaction) Execute(ctx context.Context, input *ProcessTransac
 	if err != nil {
 		return nil, err
 	}
-	payable, err := entity.PayableFactory(uuid.New().String(), transaction)
+	payable, err := entity.NewPayable(uuid.New().String(), transaction)
 	if err != nil {
 		return nil, err
 	}

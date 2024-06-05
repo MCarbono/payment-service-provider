@@ -7,11 +7,21 @@ import (
 )
 
 func TestCalculateFeeWithDebitCard(t *testing.T) {
-	fee := calculateFee(100, debitCard.fee)
+	feeCalculator, err := FeeCalculatorFactory("debit_card")
+	assert.Equal(t, err, nil)
+	fee := feeCalculator.calculate(100)
 	assert.Equal(t, fee, float32(3.0))
 }
 
 func TestCalculateFeeWithCreditCard(t *testing.T) {
-	fee := calculateFee(100, creditCard.fee)
+	feeCalculator, err := FeeCalculatorFactory("credit_card")
+	assert.Equal(t, err, nil)
+	fee := feeCalculator.calculate(100)
 	assert.Equal(t, fee, float32(5))
+}
+
+func TestFailInvalidMethod(t *testing.T) {
+	_, err := FeeCalculatorFactory("invalid_method")
+	assert.NotNil(t, err)
+	assert.Equal(t, err.Error(), "invalid paymentMethod: invalid_method")
 }
