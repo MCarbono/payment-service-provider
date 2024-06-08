@@ -1,8 +1,79 @@
 package entity
 
 import (
+	"fmt"
 	"time"
+
+	"github.com/google/uuid"
 )
+
+type Payables interface {
+	GetData() *Payable
+}
+
+type PayableWithDebitCard struct {
+	Data *Payable
+}
+
+func (p *PayableWithDebitCard) GetData() *Payable {
+	return p.Data
+}
+
+func newPayableWithDebitCard(transaction *Transaction) (Payables, error) {
+	p := &Payable{
+		id:            uuid.New().String(),
+		clientID:      transaction.clientID,
+		transactionID: transaction.GetID(),
+		createdAt:     transaction.GetCreatedAt(),
+	}
+	feeCalculator, err := FeeCalculatorFactory(transaction.paymentMethod.Method())
+	if err != nil {
+		return nil, err
+	}
+	fee := feeCalculator.calculate(transaction.GetValue())
+	p.feeAmount = fee
+	p.amount = transaction.GetValue() - fee
+	p.paymentDate = transaction.GetCreatedAt()
+	p.status = paid
+	return &PayableWithDebitCard{Data: p}, nil
+}
+
+type PayableWithCreditCard struct {
+	Data *Payable
+}
+
+func (p *PayableWithCreditCard) GetData() *Payable {
+	return p.Data
+}
+
+func newPayableWithCreditCard(transaction *Transaction) (Payables, error) {
+	p := &Payable{
+		id:            uuid.New().String(),
+		clientID:      transaction.clientID,
+		transactionID: transaction.GetID(),
+		createdAt:     transaction.GetCreatedAt(),
+	}
+	feeCalculator, err := FeeCalculatorFactory(transaction.paymentMethod.Method())
+	if err != nil {
+		return nil, err
+	}
+	fee := feeCalculator.calculate(transaction.GetValue())
+	p.feeAmount = fee
+	p.amount = transaction.GetValue() - fee
+	p.status = waitFunds
+	p.paymentDate = transaction.GetCreatedAt().AddDate(0, 0, 30)
+	return &PayableWithCreditCard{Data: p}, nil
+}
+
+func PayableFactory(transaction *Transaction) (Payables, error) {
+	if transaction.GetPaymentMethod() == "debit_card" {
+		return newPayableWithDebitCard(transaction)
+	}
+	if transaction.GetPaymentMethod() == "credit_card" {
+		return newPayableWithCreditCard(transaction)
+	}
+	return nil, fmt.Errorf("invalid transaciton paymentMethod: %s", transaction.GetPaymentMethod())
+}
 
 type Payable struct {
 	id            string
@@ -45,29 +116,6 @@ func (p *Payable) GetCreatedAt() time.Time {
 
 func (p *Payable) GetPaymentDate() time.Time {
 	return p.paymentDate
-}
-
-func NewPayable(ID string, transaction *Transaction) (*Payable, error) {
-	p := &Payable{
-		id:            ID,
-		clientID:      transaction.clientID,
-		transactionID: transaction.GetID(),
-		createdAt:     transaction.GetCreatedAt(),
-	}
-	feeCalculator, err := FeeCalculatorFactory(transaction.paymentMethod.Method())
-	if err != nil {
-		return nil, err
-	}
-	fee := feeCalculator.calculate(transaction.GetValue())
-	p.feeAmount = fee
-	p.amount = transaction.GetValue() - fee
-	p.paymentDate = transaction.GetCreatedAt()
-	p.status = paid
-	if transaction.paymentMethod.Method() == "credit_card" {
-		p.status = waitFunds
-		p.paymentDate = transaction.GetCreatedAt().AddDate(0, 0, 30)
-	}
-	return p, nil
 }
 
 func RestorePayable(id, clientID, transactionID string, status payableStatus, fee, value float32, createdAt, paymentDate time.Time) *Payable {

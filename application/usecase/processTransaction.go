@@ -36,7 +36,7 @@ func (uc *ProcessTransaction) Execute(ctx context.Context, input *ProcessTransac
 	if err != nil {
 		return nil, err
 	}
-	payable, err := entity.NewPayable(uuid.New().String(), transaction)
+	payable, err := entity.PayableFactory(transaction)
 	if err != nil {
 		return nil, err
 	}
@@ -45,13 +45,13 @@ func (uc *ProcessTransaction) Execute(ctx context.Context, input *ProcessTransac
 		if err != nil {
 			return err
 		}
-		err = repositories.Payable().Save(ctx, payable)
+		err = repositories.Payable().Save(ctx, payable.GetData())
 		if err != nil {
 			return err
 		}
 		return nil
 	})
-	return NewProcessTransactionDTO(transaction, payable), err
+	return NewProcessTransactionDTO(transaction, payable.GetData()), err
 }
 
 type ProcessTransactionInput struct {
