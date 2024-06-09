@@ -15,7 +15,6 @@ type ProcessTransaction struct {
 }
 
 func NewProcessTransaction(
-
 	uow uow.UnitOfWork,
 ) *ProcessTransaction {
 	return &ProcessTransaction{
@@ -45,13 +44,13 @@ func (uc *ProcessTransaction) Execute(ctx context.Context, input *ProcessTransac
 		if err != nil {
 			return err
 		}
-		err = repositories.Payable().Save(ctx, payable.GetData())
+		err = repositories.Payable().Save(ctx, payable)
 		if err != nil {
 			return err
 		}
 		return nil
 	})
-	return NewProcessTransactionDTO(transaction, payable.GetData()), err
+	return NewProcessTransactionDTO(transaction, payable), err
 }
 
 type ProcessTransactionInput struct {
@@ -102,7 +101,7 @@ type PayableDTO struct {
 	PaymentDate   time.Time `json:"payment_date"`
 }
 
-func NewProcessTransactionDTO(transaction *entity.Transaction, payable *entity.Payable) *ProcessTransactionOutput {
+func NewProcessTransactionDTO(transaction *entity.Transaction, payable entity.Payable) *ProcessTransactionOutput {
 	return &ProcessTransactionOutput{
 		TransactionDTO: TransactionDTO{
 			ID:          transaction.GetID(),
@@ -117,14 +116,14 @@ func NewProcessTransactionDTO(transaction *entity.Transaction, payable *entity.P
 			},
 		},
 		PayableDTO: PayableDTO{
-			ID:            payable.GetID(),
-			ClientID:      payable.GetClientID(),
-			TransactionID: payable.GetTransactionID(),
-			Status:        payable.GetStatus(),
-			FeeAmount:     payable.GetFeeAmount(),
-			Amount:        payable.GetAmount(),
-			CreatedAt:     payable.GetCreatedAt(),
-			PaymentDate:   payable.GetPaymentDate(),
+			ID:            payable.GetData().GetID(),
+			ClientID:      payable.GetData().GetClientID(),
+			TransactionID: payable.GetData().GetTransactionID(),
+			Status:        payable.GetData().GetStatus(),
+			FeeAmount:     payable.GetData().GetFeeAmount(),
+			Amount:        payable.GetData().GetAmount(),
+			CreatedAt:     payable.GetData().GetCreatedAt(),
+			PaymentDate:   payable.GetData().GetPaymentDate(),
 		},
 	}
 }

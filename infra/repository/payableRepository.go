@@ -31,16 +31,16 @@ func NewPayableRepository(DB *sql.DB) *PayableRepository {
 	}
 }
 
-func (r *PayableRepository) Save(ctx context.Context, payable *entity.Payable) error {
+func (r *PayableRepository) Save(ctx context.Context, payable entity.Payable) error {
 	err := r.queries.CreatePayable(ctx, db.CreatePayableParams{
-		ID:            payable.GetID(),
-		ClientID:      sql.NullString{String: payable.GetClientID(), Valid: true},
-		TransactionID: sql.NullString{String: payable.GetTransactionID(), Valid: true},
-		Status:        sql.NullString{String: payable.GetStatus(), Valid: true},
-		FeeAmount:     sql.NullInt64{Int64: int64(payable.GetFeeAmount() * 100), Valid: true},
-		Amount:        sql.NullInt64{Int64: int64(payable.GetAmount() * 100), Valid: true},
-		PaymentDate:   payable.GetPaymentDate(),
-		CreatedAt:     payable.GetCreatedAt(),
+		ID:            payable.GetData().GetID(),
+		ClientID:      sql.NullString{String: payable.GetData().GetClientID(), Valid: true},
+		TransactionID: sql.NullString{String: payable.GetData().GetTransactionID(), Valid: true},
+		Status:        sql.NullString{String: payable.GetData().GetStatus(), Valid: true},
+		FeeAmount:     sql.NullInt64{Int64: int64(payable.GetData().GetFeeAmount() * 100), Valid: true},
+		Amount:        sql.NullInt64{Int64: int64(payable.GetData().GetAmount() * 100), Valid: true},
+		PaymentDate:   payable.GetData().GetPaymentDate(),
+		CreatedAt:     payable.GetData().GetCreatedAt(),
 	})
 	if err != nil {
 		return fmt.Errorf("error trying to save payable: %w", err)
@@ -48,7 +48,7 @@ func (r *PayableRepository) Save(ctx context.Context, payable *entity.Payable) e
 	return nil
 }
 
-func (r *PayableRepository) GetByID(ctx context.Context, ID string) (*entity.Payable, error) {
+func (r *PayableRepository) GetByID(ctx context.Context, ID string) (entity.Payable, error) {
 	model, err := r.queries.GetPayableByID(ctx, ID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -57,7 +57,7 @@ func (r *PayableRepository) GetByID(ctx context.Context, ID string) (*entity.Pay
 		return nil, fmt.Errorf("error trying to retrieve payable from DB: %w", err)
 	}
 	status := entity.GetPayableStatus(model.Status.String)
-	payable := entity.RestorePayable(
+	payable := entity.RecoverPayableData(
 		model.ID,
 		model.ClientID.String,
 		model.TransactionID.String,
@@ -67,5 +67,5 @@ func (r *PayableRepository) GetByID(ctx context.Context, ID string) (*entity.Pay
 		model.CreatedAt,
 		model.PaymentDate,
 	)
-	return payable, nil
+	return entity.RestorePayable(payable), nil
 }
