@@ -1,14 +1,14 @@
 package entity
 
 type paymentMethod interface {
-	Method() string
+	String() string
 }
 
 type DebitCard struct {
 	paymentMethod string
 }
 
-func (p *DebitCard) Method() string {
+func (p *DebitCard) String() string {
 	return p.paymentMethod
 }
 
@@ -16,7 +16,7 @@ type CreditCard struct {
 	paymentMethod string
 }
 
-func (p *CreditCard) Method() string {
+func (p *CreditCard) String() string {
 	return p.paymentMethod
 }
 

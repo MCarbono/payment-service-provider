@@ -53,7 +53,7 @@ func TestListTransactions(t *testing.T) {
 				CardVerificationCode: transactionDebitCard.GetCard().GetVerificationCode(),
 				CardLastDigits:       transactionDebitCard.GetCard().GetLastDigits(),
 				CardValidDate:        transactionDebitCard.GetCard().GetValidDate(),
-				PaymentMethod:        transactionDebitCard.GetPaymentMethod(),
+				PaymentMethod:        transactionDebitCard.PaymentMethod().String(),
 				CreatedAt:            transactionDebitCard.GetCreatedAt(),
 			},
 			{
@@ -65,7 +65,7 @@ func TestListTransactions(t *testing.T) {
 				CardVerificationCode: transactionCreditCard.GetCard().GetVerificationCode(),
 				CardLastDigits:       transactionCreditCard.GetCard().GetLastDigits(),
 				CardValidDate:        transactionCreditCard.GetCard().GetValidDate(),
-				PaymentMethod:        transactionCreditCard.GetPaymentMethod(),
+				PaymentMethod:        transactionCreditCard.PaymentMethod().String(),
 				CreatedAt:            transactionCreditCard.GetCreatedAt(),
 			},
 		}

@@ -42,7 +42,7 @@ func (r *TransactionRepository) Save(ctx context.Context, transaction *entity.Tr
 		CardVerificationCode: sql.NullString{String: card.GetVerificationCode(), Valid: true},
 		CardLastDigits:       sql.NullString{String: card.GetLastDigits(), Valid: true},
 		CardValidDate:        card.GetValidDate(),
-		PaymentMethod:        sql.NullString{String: transaction.GetPaymentMethod(), Valid: true},
+		PaymentMethod:        sql.NullString{String: transaction.PaymentMethod().String(), Valid: true},
 		CreatedAt:            transaction.GetCreatedAt(),
 	})
 	if err != nil {

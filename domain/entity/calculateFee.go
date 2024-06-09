@@ -34,11 +34,11 @@ func (f *FeeWithDebitCard) calculate(value float32) float32 {
 	return value * f.percentage
 }
 
-func FeeCalculatorFactory(method string) (Fee, error) {
-	if method == "debit_card" {
+func FeeCalculatorFactory(method paymentMethod) (Fee, error) {
+	if method == debitCard {
 		return newFeeWithDebitCard(), nil
 	}
-	if method == "credit_card" {
+	if method == creditCard {
 		return newFeeWithCreditCard(), nil
 	}
 	return nil, fmt.Errorf("invalid paymentMethod: %s", method)

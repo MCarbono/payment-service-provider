@@ -29,7 +29,7 @@ func TestCreateTransaction(t *testing.T) {
 	assert.Equal(t, transactionSaved.GetClientID(), transaction.GetClientID())
 	assert.Equal(t, transactionSaved.GetValue(), transaction.GetValue())
 	assert.Equal(t, transactionSaved.GetDescription(), transaction.GetDescription())
-	assert.Equal(t, transactionSaved.GetPaymentMethod(), transaction.GetPaymentMethod())
+	assert.Equal(t, transactionSaved.PaymentMethod(), transaction.PaymentMethod())
 	assert.Equal(t, transactionSaved.GetCreatedAt(), transaction.GetCreatedAt())
 	assert.Equal(t, transactionSaved.GetCard().GetLastDigits(), transaction.GetCard().GetLastDigits())
 	assert.Equal(t, transactionSaved.GetCard().GetVerificationCode(), transaction.GetCard().GetVerificationCode())

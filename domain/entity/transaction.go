@@ -56,8 +56,8 @@ func (t *Transaction) GetCard() *Card {
 	return t.card
 }
 
-func (t *Transaction) GetPaymentMethod() string {
-	return t.paymentMethod.Method()
+func (t *Transaction) PaymentMethod() paymentMethod {
+	return t.paymentMethod
 }
 
 func (t *Transaction) GetCreatedAt() time.Time {

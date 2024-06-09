@@ -26,7 +26,7 @@ func newPayableWithDebitCard(transaction *Transaction) (Payable, error) {
 		transactionID: transaction.GetID(),
 		createdAt:     transaction.GetCreatedAt(),
 	}
-	feeCalculator, err := FeeCalculatorFactory(transaction.paymentMethod.Method())
+	feeCalculator, err := FeeCalculatorFactory(transaction.paymentMethod)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func newPayableWithCreditCard(transaction *Transaction) (Payable, error) {
 		transactionID: transaction.GetID(),
 		createdAt:     transaction.GetCreatedAt(),
 	}
-	feeCalculator, err := FeeCalculatorFactory(transaction.paymentMethod.Method())
+	feeCalculator, err := FeeCalculatorFactory(transaction.paymentMethod)
 	if err != nil {
 		return nil, err
 	}
@@ -66,13 +66,13 @@ func newPayableWithCreditCard(transaction *Transaction) (Payable, error) {
 }
 
 func PayableFactory(transaction *Transaction) (Payable, error) {
-	if transaction.GetPaymentMethod() == "debit_card" {
+	if transaction.PaymentMethod() == debitCard {
 		return newPayableWithDebitCard(transaction)
 	}
-	if transaction.GetPaymentMethod() == "credit_card" {
+	if transaction.PaymentMethod() == creditCard {
 		return newPayableWithCreditCard(transaction)
 	}
-	return nil, fmt.Errorf("invalid transaciton paymentMethod: %s", transaction.GetPaymentMethod())
+	return nil, fmt.Errorf("invalid transaciton paymentMethod: %s", transaction.PaymentMethod())
 }
 
 type PayableImpl struct {
