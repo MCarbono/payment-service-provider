@@ -7,20 +7,20 @@ import (
 	"github.com/google/uuid"
 )
 
-type Payable interface {
-	GetData() *PayableImpl
+type PayableInterface interface {
+	GetData() *Payable
 }
 
 type PayableWithDebitCard struct {
-	Data *PayableImpl
+	Data *Payable
 }
 
-func (p *PayableWithDebitCard) GetData() *PayableImpl {
+func (p *PayableWithDebitCard) GetData() *Payable {
 	return p.Data
 }
 
-func newPayableWithDebitCard(transaction *Transaction) (Payable, error) {
-	p := &PayableImpl{
+func newPayableWithDebitCard(transaction *Transaction) (PayableInterface, error) {
+	p := &Payable{
 		id:            uuid.New().String(),
 		clientID:      transaction.clientID,
 		transactionID: transaction.GetID(),
@@ -39,15 +39,15 @@ func newPayableWithDebitCard(transaction *Transaction) (Payable, error) {
 }
 
 type PayableWithCreditCard struct {
-	Data *PayableImpl
+	Data *Payable
 }
 
-func (p *PayableWithCreditCard) GetData() *PayableImpl {
+func (p *PayableWithCreditCard) GetData() *Payable {
 	return p.Data
 }
 
-func newPayableWithCreditCard(transaction *Transaction) (Payable, error) {
-	p := &PayableImpl{
+func newPayableWithCreditCard(transaction *Transaction) (PayableInterface, error) {
+	p := &Payable{
 		id:            uuid.New().String(),
 		clientID:      transaction.clientID,
 		transactionID: transaction.GetID(),
@@ -65,7 +65,7 @@ func newPayableWithCreditCard(transaction *Transaction) (Payable, error) {
 	return &PayableWithCreditCard{Data: p}, nil
 }
 
-func PayableFactory(transaction *Transaction) (Payable, error) {
+func PayableFactory(transaction *Transaction) (PayableInterface, error) {
 	if transaction.PaymentMethod() == debitCard {
 		return newPayableWithDebitCard(transaction)
 	}
@@ -75,7 +75,7 @@ func PayableFactory(transaction *Transaction) (Payable, error) {
 	return nil, fmt.Errorf("invalid transaciton paymentMethod: %s", transaction.PaymentMethod())
 }
 
-type PayableImpl struct {
+type Payable struct {
 	id            string
 	clientID      string
 	transactionID string
@@ -86,40 +86,40 @@ type PayableImpl struct {
 	paymentDate   time.Time
 }
 
-func (p *PayableImpl) GetID() string {
+func (p *Payable) GetID() string {
 	return p.id
 }
 
-func (p *PayableImpl) GetClientID() string {
+func (p *Payable) GetClientID() string {
 	return p.clientID
 }
 
-func (p *PayableImpl) GetTransactionID() string {
+func (p *Payable) GetTransactionID() string {
 	return p.transactionID
 }
 
-func (p *PayableImpl) GetStatus() string {
+func (p *Payable) GetStatus() string {
 	return p.status.String()
 }
 
-func (p *PayableImpl) GetFeeAmount() float32 {
+func (p *Payable) GetFeeAmount() float32 {
 	return p.feeAmount
 }
 
-func (p *PayableImpl) GetAmount() float32 {
+func (p *Payable) GetAmount() float32 {
 	return p.amount
 }
 
-func (p *PayableImpl) GetCreatedAt() time.Time {
+func (p *Payable) GetCreatedAt() time.Time {
 	return p.createdAt
 }
 
-func (p *PayableImpl) GetPaymentDate() time.Time {
+func (p *Payable) GetPaymentDate() time.Time {
 	return p.paymentDate
 }
 
-func RecoverPayableData(id, clientID, transactionID string, status payableStatus, fee, value float32, createdAt, paymentDate time.Time) *PayableImpl {
-	p := &PayableImpl{
+func RecoverPayableData(id, clientID, transactionID string, status payableStatus, fee, value float32, createdAt, paymentDate time.Time) *Payable {
+	p := &Payable{
 		id:            id,
 		clientID:      clientID,
 		transactionID: transactionID,
@@ -132,7 +132,7 @@ func RecoverPayableData(id, clientID, transactionID string, status payableStatus
 	return p
 }
 
-func RestorePayable(p *PayableImpl) Payable {
+func RestorePayable(p *Payable) PayableInterface {
 	if p.status == paid {
 		return &PayableWithDebitCard{Data: p}
 	}

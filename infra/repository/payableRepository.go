@@ -31,7 +31,7 @@ func NewPayableRepository(DB *sql.DB) *PayableRepository {
 	}
 }
 
-func (r *PayableRepository) Save(ctx context.Context, payable entity.Payable) error {
+func (r *PayableRepository) Save(ctx context.Context, payable entity.PayableInterface) error {
 	err := r.queries.CreatePayable(ctx, db.CreatePayableParams{
 		ID:            payable.GetData().GetID(),
 		ClientID:      sql.NullString{String: payable.GetData().GetClientID(), Valid: true},
@@ -48,7 +48,7 @@ func (r *PayableRepository) Save(ctx context.Context, payable entity.Payable) er
 	return nil
 }
 
-func (r *PayableRepository) GetByID(ctx context.Context, ID string) (entity.Payable, error) {
+func (r *PayableRepository) GetByID(ctx context.Context, ID string) (entity.PayableInterface, error) {
 	model, err := r.queries.GetPayableByID(ctx, ID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {

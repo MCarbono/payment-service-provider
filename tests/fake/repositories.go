@@ -46,11 +46,11 @@ func (f *fakeRepositoriesSavePayableError) Transaction() repository.TransationRe
 type fakePayableRepositorySaveError struct {
 }
 
-func (f *fakePayableRepositorySaveError) Save(ctx context.Context, payable entity.Payable) error {
+func (f *fakePayableRepositorySaveError) Save(ctx context.Context, payable entity.PayableInterface) error {
 	return errors.New("internal server error")
 }
 
-func (f *fakePayableRepositorySaveError) GetByID(ctx context.Context, ID string) (entity.Payable, error) {
+func (f *fakePayableRepositorySaveError) GetByID(ctx context.Context, ID string) (entity.PayableInterface, error) {
 	return nil, nil
 }
 

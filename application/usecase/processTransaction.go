@@ -101,7 +101,7 @@ type PayableDTO struct {
 	PaymentDate   time.Time `json:"payment_date"`
 }
 
-func NewProcessTransactionDTO(transaction *entity.Transaction, payable entity.Payable) *ProcessTransactionOutput {
+func NewProcessTransactionDTO(transaction *entity.Transaction, payable entity.PayableInterface) *ProcessTransactionOutput {
 	return &ProcessTransactionOutput{
 		TransactionDTO: TransactionDTO{
 			ID:          transaction.GetID(),
