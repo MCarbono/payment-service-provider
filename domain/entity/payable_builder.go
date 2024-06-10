@@ -16,22 +16,11 @@ type BuildProcess interface {
 	SetAmount(amount float32) BuildProcess
 	SetCreatedAt(createdAt time.Time) BuildProcess
 	SetPaymentDate(paymentDate time.Time) BuildProcess
-	Build() PayableBuilder
-}
-
-type PayableBuilder struct {
-	id            string
-	clientID      string
-	transactionID string
-	status        payableStatus
-	feeAmount     float32
-	amount        float32
-	createdAt     time.Time
-	paymentDate   time.Time
+	Build() Payable
 }
 
 type PayableBuilderWithDebitCard struct {
-	p             PayableBuilder
+	p             Payable
 	feePercentage float32
 }
 
@@ -81,12 +70,12 @@ func (b *PayableBuilderWithDebitCard) SetPaymentDate(paymentDate time.Time) Buil
 	return b
 }
 
-func (b *PayableBuilderWithDebitCard) Build() PayableBuilder {
+func (b *PayableBuilderWithDebitCard) Build() Payable {
 	return b.p
 }
 
 type PayableBuilderWithCreditCard struct {
-	p             PayableBuilder
+	p             Payable
 	feePercentage float32
 }
 
@@ -136,7 +125,7 @@ func (b *PayableBuilderWithCreditCard) SetPaymentDate(paymentDate time.Time) Bui
 	return b
 }
 
-func (b *PayableBuilderWithCreditCard) Build() PayableBuilder {
+func (b *PayableBuilderWithCreditCard) Build() Payable {
 	return b.p
 }
 
