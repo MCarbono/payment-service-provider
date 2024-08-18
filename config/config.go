@@ -2,13 +2,15 @@ package config
 
 import (
 	"os"
+	"strings"
 
 	"github.com/joho/godotenv"
 )
 
 type config struct {
-	DatabaseConfig DatabaseConfig
-	ServerPort     string
+	DatabaseConfig     DatabaseConfig
+	ServerPort         string
+	TracingExporterURL string
 }
 
 type DatabaseConfig struct {
@@ -25,8 +27,10 @@ func LoadEnvConfig(env string) (config, error) {
 	if err != nil {
 		return cfg, err
 	}
+	cfg.TracingExporterURL = os.Getenv("TRACING_EXPORTER_URL")
 	cfg.DatabaseConfig.Host = "localhost"
 	if env != "local" {
+		cfg.TracingExporterURL = strings.ReplaceAll(cfg.TracingExporterURL, "localhost", "zipkin")
 		cfg.DatabaseConfig.Host = os.Getenv("DB_HOST")
 	}
 	cfg.DatabaseConfig.Port = os.Getenv("DB_PORT")
