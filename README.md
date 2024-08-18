@@ -74,7 +74,7 @@ docker compose up -d
 ```
 
 ```bash
-make db_up
+make infra_up
 ```
 
 then start the api:
@@ -94,10 +94,8 @@ docker compose down
 ```
 
 ```bash
-make db_down
+make infra_down
 ```
-
-
 
 <a id="Endpoints"></a> 
 ## 💻 Endpoints
