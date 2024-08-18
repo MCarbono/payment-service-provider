@@ -8,6 +8,7 @@ import (
 	"payment-service-provider/infra/tracing"
 
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -27,8 +28,13 @@ func (uc *ClientBalance) Execute(ctx context.Context, input *ClientBalanceInput)
 	span.SetAttributes(attribute.String("client_id", input.ClientID))
 	balance, err := uc.conn.GetBalanceByStatuses(ctx, sql.NullString{String: input.ClientID, Valid: true})
 	if err != nil {
-		return nil, fmt.Errorf("error trying to retrieve balance from user %s: %w", input.ClientID, err)
+		err = fmt.Errorf("error trying to retrieve balance from user %s: %w", input.ClientID, err)
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		span.End()
+		return nil, err
 	}
+	span.End()
 	return &ClientBalanceOutput{
 		Balance: ClientBalanceStatus{
 			Paid:      float32(balance[0].TotalAmount / 100),

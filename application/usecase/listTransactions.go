@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -28,7 +29,11 @@ func (uc *ListTransactions) Execute(ctx context.Context, input *ListTransationsI
 	span.SetAttributes(attribute.String("client_id", input.ClientID))
 	models, err := uc.conn.GetTransactionsByClientID(ctx, sql.NullString{String: input.ClientID, Valid: true})
 	if err != nil {
-		return nil, fmt.Errorf("error trying to get transactions by clientId %s: %w", input.ClientID, err)
+		err = fmt.Errorf("error trying to get transactions by clientId %s: %w", input.ClientID, err)
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		span.End()
+		return nil, err
 	}
 	span.End()
 	return NewListTransactionsOutput(models), nil
