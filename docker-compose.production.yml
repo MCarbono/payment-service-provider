@@ -21,6 +21,13 @@ services:
      - 5432:5432
     networks:
      - mynetwork
+  zipkin:
+    image: openzipkin/zipkin
+    container_name: zipkin-psp-dev
+    ports:
+      - "9411:9411"
+    networks:
+     - mynetwork
 networks:
   mynetwork:
     driver: bridge

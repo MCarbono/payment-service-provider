@@ -1,12 +1,12 @@
 # Build stage
-FROM golang:1.19-alpine3.16 AS builder
+FROM golang:1.22.2-alpine AS builder
 WORKDIR /app
 RUN apk add --no-cache curl
 COPY . .
 RUN go build -o main main.go
 RUN curl -L https://github.com/golang-migrate/migrate/releases/download/v4.12.2/migrate.linux-amd64.tar.gz | tar xvz
 
-#Run stage
+# Run stage
 FROM alpine:3.16
 WORKDIR /app
 COPY --from=builder /app/main .
