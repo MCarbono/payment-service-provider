@@ -70,13 +70,9 @@ func (c *Transaction) Balance(w http.ResponseWriter, r *http.Request) {
 	output, err := c.clientBalance.Execute(ctx, &usecase.ClientBalanceInput{ClientID: id})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(jsonErr{Err: err.Error()})
+		json.NewEncoder(w).Encode(newControllerOutput(ctx, nil, err))
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(&output)
-}
-
-type jsonErr struct {
-	Err string `json:"error"`
+	json.NewEncoder(w).Encode(newControllerOutput(ctx, output, err))
 }
