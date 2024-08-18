@@ -5,6 +5,10 @@ import (
 	"database/sql"
 	"fmt"
 	db "payment-service-provider/infra/db/sqlc"
+	"payment-service-provider/infra/tracing"
+
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type ClientBalance struct {
@@ -18,6 +22,9 @@ func NewClientBalance(db db.Querier) *ClientBalance {
 }
 
 func (uc *ClientBalance) Execute(ctx context.Context, input *ClientBalanceInput) (*ClientBalanceOutput, error) {
+	ctx, span := tracing.Tracer.Start(ctx, "making query to database")
+	span.AddEvent("query", trace.WithAttributes(attribute.String("name", "GetBalanceByStatuses")))
+	span.SetAttributes(attribute.String("client_id", input.ClientID))
 	balance, err := uc.conn.GetBalanceByStatuses(ctx, sql.NullString{String: input.ClientID, Valid: true})
 	if err != nil {
 		return nil, fmt.Errorf("error trying to retrieve balance from user %s: %w", input.ClientID, err)

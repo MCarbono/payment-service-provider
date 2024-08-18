@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"payment-service-provider/application/uow"
 	"payment-service-provider/domain/entity"
+	"payment-service-provider/infra/tracing"
 	"time"
 
 	"github.com/google/uuid"
+	"go.opentelemetry.io/otel/attribute"
 )
 
 type ProcessTransaction struct {
@@ -39,6 +41,8 @@ func (uc *ProcessTransaction) Execute(ctx context.Context, input *ProcessTransac
 	if err != nil {
 		return nil, err
 	}
+	ctx, span := tracing.Tracer.Start(ctx, "UOW - starting")
+	span.SetAttributes(attribute.String("client_id", input.ClientID))
 	err = uc.uow.RunTx(ctx, func(ctx context.Context, repositories uow.Repositories) error {
 		err := repositories.Transaction().Save(ctx, transaction)
 		if err != nil {
@@ -50,6 +54,7 @@ func (uc *ProcessTransaction) Execute(ctx context.Context, input *ProcessTransac
 		}
 		return nil
 	})
+	span.End()
 	return NewProcessTransactionDTO(transaction, payable), err
 }
 

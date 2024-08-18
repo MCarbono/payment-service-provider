@@ -7,6 +7,9 @@ import (
 	"fmt"
 	"payment-service-provider/domain/entity"
 	db "payment-service-provider/infra/db/sqlc"
+	"payment-service-provider/infra/tracing"
+
+	"go.opentelemetry.io/otel/codes"
 )
 
 var (
@@ -32,6 +35,8 @@ func NewPayableRepository(DB *sql.DB) *PayableRepository {
 }
 
 func (r *PayableRepository) Save(ctx context.Context, payable entity.PayableInterface) error {
+	_, span := tracing.Tracer.Start(ctx, "saving payable into database")
+	defer span.End()
 	err := r.queries.CreatePayable(ctx, db.CreatePayableParams{
 		ID:            payable.GetData().GetID(),
 		ClientID:      sql.NullString{String: payable.GetData().GetClientID(), Valid: true},
@@ -43,7 +48,10 @@ func (r *PayableRepository) Save(ctx context.Context, payable entity.PayableInte
 		CreatedAt:     payable.GetData().GetCreatedAt(),
 	})
 	if err != nil {
-		return fmt.Errorf("error trying to save payable: %w", err)
+		err = fmt.Errorf("error trying to save payable: %w", err)
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return err
 	}
 	return nil
 }

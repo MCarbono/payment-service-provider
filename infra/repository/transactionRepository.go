@@ -7,6 +7,9 @@ import (
 	"fmt"
 	"payment-service-provider/domain/entity"
 	db "payment-service-provider/infra/db/sqlc"
+	"payment-service-provider/infra/tracing"
+
+	"go.opentelemetry.io/otel/codes"
 )
 
 var (
@@ -32,6 +35,8 @@ func NewTransactionRepository(DB *sql.DB) *TransactionRepository {
 }
 
 func (r *TransactionRepository) Save(ctx context.Context, transaction *entity.Transaction) error {
+	_, span := tracing.Tracer.Start(ctx, "saving transaction into database")
+	defer span.End()
 	card := transaction.GetCard()
 	err := r.queries.CreateTransaction(ctx, db.CreateTransactionParams{
 		ID:                   transaction.GetID(),
@@ -46,7 +51,10 @@ func (r *TransactionRepository) Save(ctx context.Context, transaction *entity.Tr
 		CreatedAt:            transaction.GetCreatedAt(),
 	})
 	if err != nil {
-		return fmt.Errorf("error trying to insert transaction into the db: %w", err)
+		err = fmt.Errorf("error trying to insert transaction into the db: %w", err)
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return err
 	}
 	return nil
 }

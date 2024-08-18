@@ -5,7 +5,11 @@ import (
 	"database/sql"
 	"fmt"
 	db "payment-service-provider/infra/db/sqlc"
+	"payment-service-provider/infra/tracing"
 	"time"
+
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type ListTransactions struct {
@@ -19,10 +23,14 @@ func NewListTransactions(db db.Querier) *ListTransactions {
 }
 
 func (uc *ListTransactions) Execute(ctx context.Context, input *ListTransationsInput) ([]ListTransactionsOutput, error) {
+	ctx, span := tracing.Tracer.Start(ctx, "making query to database")
+	span.AddEvent("query", trace.WithAttributes(attribute.String("name", "GetTransactionsByClientID")))
+	span.SetAttributes(attribute.String("client_id", input.ClientID))
 	models, err := uc.conn.GetTransactionsByClientID(ctx, sql.NullString{String: input.ClientID, Valid: true})
 	if err != nil {
 		return nil, fmt.Errorf("error trying to get transactions by clientId %s: %w", input.ClientID, err)
 	}
+	span.End()
 	return NewListTransactionsOutput(models), nil
 }
 
