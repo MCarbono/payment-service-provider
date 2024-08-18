@@ -31,8 +31,11 @@ func TestListTransactions(t *testing.T) {
 		assert.Equal(t, err, nil)
 		clientId := uuid.New().String()
 		transactionDebitCard, err := entity.NewTransaction(uuid.New().String(), clientId, "compra teste", 100.0, time.Now(), card, entity.PaymentMethods["debit_card"])
+		assert.Equal(t, err, nil)
 		err = transactionRepo.Save(context.Background(), transactionDebitCard)
+		assert.Equal(t, err, nil)
 		transactionCreditCard, err := entity.NewTransaction(uuid.New().String(), clientId, "compra teste", 100.0, time.Now(), card, entity.PaymentMethods["credit_card"])
+		assert.Equal(t, err, nil)
 		err = transactionRepo.Save(context.Background(), transactionCreditCard)
 		assert.Equal(t, err, nil)
 		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/transactions/%s", clientId), nil)
@@ -40,10 +43,13 @@ func TestListTransactions(t *testing.T) {
 		rec := httptest.NewRecorder()
 		router.ServeHTTP(rec, req)
 		assert.Equal(t, http.StatusOK, rec.Code)
-		var output []usecase.ListTransactionsOutput
+		var output controllers.ControllerOutput
 		err = json.Unmarshal(rec.Body.Bytes(), &output)
+		fmt.Printf("output %+v\n", output)
 		assert.Equal(t, err, nil)
-		expected := []usecase.ListTransactionsOutput{
+		assert.Equal(t, "00000000000000000000000000000000", output.TraceID)
+		assert.Equal(t, "", output.Error)
+		expectedData := []usecase.ListTransactionsOutput{
 			{
 				ID:                   transactionDebitCard.GetID(),
 				ClientID:             transactionDebitCard.GetClientID(),
@@ -69,7 +75,15 @@ func TestListTransactions(t *testing.T) {
 				CreatedAt:            transactionCreditCard.GetCreatedAt(),
 			},
 		}
-		assert.Equal(t, expected, output)
+		outputBytes, err := convertToBytes(output.Data)
+		assert.Equal(t, err, nil)
+		var transactions []usecase.ListTransactionsOutput
+		err = json.Unmarshal(outputBytes, &transactions)
+		if err != nil {
+			fmt.Println("Failed to unmarshal data:", err)
+			return
+		}
+		assert.Equal(t, expectedData, transactions)
 	})
 
 	t.Run("Should List empty transactions", func(t *testing.T) {
@@ -78,9 +92,19 @@ func TestListTransactions(t *testing.T) {
 		rec := httptest.NewRecorder()
 		router.ServeHTTP(rec, req)
 		assert.Equal(t, http.StatusOK, rec.Code)
-		var output []usecase.ListTransactionsOutput
+		var output controllers.ControllerOutput
 		err = json.Unmarshal(rec.Body.Bytes(), &output)
-		expected := []usecase.ListTransactionsOutput{}
-		assert.Equal(t, expected, output)
+		assert.Equal(t, err, nil)
+		assert.Equal(t, "00000000000000000000000000000000", output.TraceID)
+		assert.Equal(t, "", output.Error)
+		assert.Equal(t, []interface{}([]interface{}{}), output.Data)
 	})
+}
+
+func convertToBytes(data any) ([]byte, error) {
+	jsonBytes, err := json.Marshal(data)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal data to JSON: %w", err)
+	}
+	return jsonBytes, nil
 }
