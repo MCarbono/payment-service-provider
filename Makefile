@@ -24,10 +24,10 @@ migrate-create:
 sqlc-generate:
 	sqlc generate
 
-db_down:
+infra_down:
 	docker compose down 
 
-db_up:
+infra_up:
 	docker compose up -d 
 
 build:
