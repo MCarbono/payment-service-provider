@@ -1,4 +1,4 @@
-<h1 align="center">Money transfer API</h1>
+<h1 align="center">PSP</h1>
 
 ## 📜 Summary
 - [About](#About)
